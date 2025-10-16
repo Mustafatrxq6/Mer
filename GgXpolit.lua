@@ -236,7 +236,7 @@ game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1RPNam1eTe
 
 MakeWindow({
   Hub = {
-    Title = "Xploit Hub ‖ Brookhaven || Beta",
+    Title = "Xpolit Hub ‖ Brookhaven || V0.1",
     Animation = "يتم التحميل عزيزي المستخدم...."
   },
   Key = {
