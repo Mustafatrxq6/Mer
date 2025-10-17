@@ -371,10 +371,282 @@ AddButton(ScriptsTab, {
 })
 
 local Main = MakeTab({
-    Name = "أكسسوارات نادره",
+    Name = "جميع اغراض السكن",
     Image = "rbxassetid://83107814722177",
     TabTitle = false
 })
+
+AddButton(ScriptsTab, {
+    Name = "أداة نسخ سكن (ساموراي)",
+    Callback = function()
+        local Players = game:GetService("Players")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local LocalPlayer = Players.LocalPlayer
+
+        local TOOL_NAME = "نسخ سكن (ساموراي)"
+        local toolEquipped = false
+
+        -- إنشاء الأداة إذا مو موجودة
+        local backpack = LocalPlayer:WaitForChild("Backpack")
+        if not backpack:FindFirstChild(TOOL_NAME) then
+            local tool = Instance.new("Tool")
+            tool.Name = TOOL_NAME
+            tool.RequiresHandle = true
+
+            local handle = Instance.new("Part")
+            handle.Name = "Handle"
+            handle.Size = Vector3.new(1,1,1)
+            handle.Parent = tool
+
+            tool.Equipped:Connect(function()
+                toolEquipped = true
+            end)
+            tool.Unequipped:Connect(function()
+                toolEquipped = false
+            end)
+
+            tool.Parent = backpack
+        end
+
+        -- دالة نسخ السكن
+        local function CopySkin(TargetPlayer)
+            if not TargetPlayer or TargetPlayer == LocalPlayer then return end
+            local LChar = LocalPlayer.Character
+            local TChar = TargetPlayer.Character
+            if not LChar or not TChar then return end
+
+            local LHumanoid = LChar:FindFirstChildOfClass("Humanoid")
+            local THumanoid = TChar:FindFirstChildOfClass("Humanoid")
+            if not LHumanoid or not THumanoid then return end
+
+            local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+
+            -- نسخ الجسم
+            local PDesc = THumanoid:GetAppliedDescription()
+            local argsBody = {
+                [1] = {PDesc.Torso, PDesc.RightArm, PDesc.LeftArm, PDesc.RightLeg, PDesc.LeftLeg, PDesc.Head}
+            }
+            Remotes.ChangeCharacterBody:InvokeServer(unpack(argsBody))
+            task.wait(0.3)
+
+            -- نسخ الملابس والإكسسوارات
+            if tonumber(PDesc.Shirt) then Remotes.Wear:InvokeServer(tonumber(PDesc.Shirt)) task.wait(0.2) end
+            if tonumber(PDesc.Pants) then Remotes.Wear:InvokeServer(tonumber(PDesc.Pants)) task.wait(0.2) end
+            if tonumber(PDesc.Face) then Remotes.Wear:InvokeServer(tonumber(PDesc.Face)) task.wait(0.2) end
+
+            for _, v in ipairs(PDesc:GetAccessories(true)) do
+                if v.AssetId and tonumber(v.AssetId) then
+                    Remotes.Wear:InvokeServer(tonumber(v.AssetId))
+                    task.wait(0.2)
+                end
+            end
+
+            -- نسخ لون البشرة
+            local SkinColor = TChar:FindFirstChild("Body Colors")
+            if SkinColor then
+                Remotes.ChangeBodyColor:FireServer(tostring(SkinColor.HeadColor))
+            end
+
+            -- نسخ الاسم والسيرة ولونهم
+            local Bag = TargetPlayer:FindFirstChild("PlayersBag")
+            if Bag then
+                if Bag:FindFirstChild("RPName") and Bag.RPName.Value ~= "" then
+                    Remotes.RPNameText:FireServer("RolePlayName", Bag.RPName.Value)
+                end
+                if Bag:FindFirstChild("RPBio") and Bag.RPBio.Value ~= "" then
+                    Remotes.RPNameText:FireServer("RolePlayBio", Bag.RPBio.Value)
+                end
+                if Bag:FindFirstChild("RPNameColor") then
+                    Remotes.RPNameColor:FireServer("PickingRPNameColor", Bag.RPNameColor.Value)
+                end
+                if Bag:FindFirstChild("RPBioColor") then
+                    Remotes.RPNameColor:FireServer("PickingRPBioColor", Bag.RPBioColor.Value)
+                end
+            end
+        end
+
+        -- استخدام Mouse Click بدل Touched
+        local mouse = LocalPlayer:GetMouse()
+        mouse.Button1Down:Connect(function()
+            if not toolEquipped then return end
+            local targetPart = mouse.Target
+            if not targetPart then return end
+
+            local player = Players:GetPlayerFromCharacter(targetPart.Parent)
+            if not player then
+                -- حاول نطلع للأب الأعلى 5 مرات إذا ما لقينا اللاعب مباشرة
+                local parent = targetPart.Parent
+                for i = 1,5 do
+                    if parent.Parent then
+                        parent = parent.Parent
+                        player = Players:GetPlayerFromCharacter(parent)
+                        if player then break end
+                    end
+                end
+            end
+
+            if player then
+                CopySkin(player)
+                -- إشعار على الشاشة
+                game.StarterGui:SetCore("SendNotification", {
+                    Title = "نسخ سكن (ساموراي)",
+                    Text = "تم نسخ سكن اللاعب: "..player.Name,
+                    Duration = 3
+                })
+            end
+        end)
+    end
+})
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+
+local Target = nil
+
+-- Function to get player names
+local function GetPlayerNames()
+    local PlayerNames = {}
+    for _, player in ipairs(Players:GetPlayers()) do
+        table.insert(PlayerNames, player.Name)
+    end
+    return PlayerNames
+end
+
+-- Player selection dropdown
+local Dropdown = AddDropdown(ScriptsTab, {
+    Name = "اختيار لاعب",
+    Options = GetPlayerNames(),
+    Default = Target,
+    Callback = function(Value)
+        Target = Value
+    end
+})
+
+-- Update dropdown options when someone joins or leaves
+local function UpdateDropdown()
+    Dropdown:Refresh(GetPlayerNames(), true)
+end
+
+Players.PlayerAdded:Connect(UpdateDropdown)
+Players.PlayerRemoving:Connect(UpdateDropdown)
+
+AddButton(ScriptsTab, {
+    Name = "نسخ سكن",
+    Callback = function()
+        if not Target then return end
+
+        local LP = Players.LocalPlayer
+        local LChar = LP.Character
+        local TPlayer = Players:FindFirstChild(Target)
+
+        if TPlayer and TPlayer.Character then
+            local LHumanoid = LChar and LChar:FindFirstChildOfClass("Humanoid")
+            local THumanoid = TPlayer.Character:FindFirstChildOfClass("Humanoid")
+
+            if LHumanoid and THumanoid then
+                -- RESET LOCALPLAYER
+                local LDesc = LHumanoid:GetAppliedDescription()
+
+                -- Remove current accessories, clothes, and face
+                for _, acc in ipairs(LDesc:GetAccessories(true)) do
+                    if acc.AssetId and tonumber(acc.AssetId) then
+                        Remotes.Wear:InvokeServer(tonumber(acc.AssetId))
+                        task.wait(0.2)
+                    end
+                end
+
+                if tonumber(LDesc.Shirt) then
+                    Remotes.Wear:InvokeServer(tonumber(LDesc.Shirt))
+                    task.wait(0.2)
+                end
+
+                if tonumber(LDesc.Pants) then
+                    Remotes.Wear:InvokeServer(tonumber(LDesc.Pants))
+                    task.wait(0.2)
+                end
+
+                if tonumber(LDesc.Face) then
+                    Remotes.Wear:InvokeServer(tonumber(LDesc.Face))
+                    task.wait(0.2)
+                end
+
+                -- COPY FROM TARGET PLAYER
+                local PDesc = THumanoid:GetAppliedDescription()
+
+                -- Send body parts
+                local argsBody = {
+                    [1] = {
+                        [1] = PDesc.Torso,
+                        [2] = PDesc.RightArm,
+                        [3] = PDesc.LeftArm,
+                        [4] = PDesc.RightLeg,
+                        [5] = PDesc.LeftLeg,
+                        [6] = PDesc.Head
+                    }
+                }
+                Remotes.ChangeCharacterBody:InvokeServer(unpack(argsBody))
+                task.wait(0.5)
+
+                if tonumber(PDesc.Shirt) then
+                    Remotes.Wear:InvokeServer(tonumber(PDesc.Shirt))
+                    task.wait(0.3)
+                end
+
+                if tonumber(PDesc.Pants) then
+                    Remotes.Wear:InvokeServer(tonumber(PDesc.Pants))
+                    task.wait(0.3)
+                end
+
+                if tonumber(PDesc.Face) then
+                    Remotes.Wear:InvokeServer(tonumber(PDesc.Face))
+                    task.wait(0.3)
+                end
+
+                for _, v in ipairs(PDesc:GetAccessories(true)) do
+                    if v.AssetId and tonumber(v.AssetId) then
+                        Remotes.Wear:InvokeServer(tonumber(v.AssetId))
+                        task.wait(0.3)
+                    end
+                end
+
+                local SkinColor = TPlayer.Character:FindFirstChild("Body Colors")
+                if SkinColor then
+                    Remotes.ChangeBodyColor:FireServer(tostring(SkinColor.HeadColor))
+                    task.wait(0.3)
+                end
+
+                if tonumber(PDesc.IdleAnimation) then
+                    Remotes.Wear:InvokeServer(tonumber(PDesc.IdleAnimation))
+                    task.wait(0.3)
+                end
+
+                -- Name, bio, and color
+                local Bag = TPlayer:FindFirstChild("PlayersBag")
+                if Bag then
+                    if Bag:FindFirstChild("RPName") and Bag.RPName.Value ~= "" then
+                        Remotes.RPNameText:FireServer("RolePlayName", Bag.RPName.Value)
+                        task.wait(0.3)
+                    end
+                    if Bag:FindFirstChild("RPBio") and Bag.RPBio.Value ~= "" then
+                        Remotes.RPNameText:FireServer("RolePlayBio", Bag.RPBio.Value)
+                        task.wait(0.3)
+                    end
+                    if Bag:FindFirstChild("RPNameColor") then
+                        Remotes.RPNameColor:FireServer("PickingRPNameColor", Bag.RPNameColor.Value)
+                        task.wait(0.3)
+                    end
+                    if Bag:FindFirstChild("RPBioColor") then
+                        Remotes.RPNameColor:FireServer("PickingRPBioColor", Bag.RPBioColor.Value)
+                        task.wait(0.3)
+                    end
+                end
+            end
+        end
+    end
+})
+
+AddSection(Main, {"الأكسسوارات من المطور نوكيا"})
 
 -- قائمة العناصر بأسماء صحيحة وواضحة باللهجة العربية (سعودي / عراقي)
 local itemList = {
@@ -407,7 +679,19 @@ local itemList = {
     "سلاح يطلق أشعة",
     "سيف نار",
     "سيف نجوم",
-    "دجاجة تطلق ليزر"
+    "دجاجة تطلق ليزر",
+    "سيف الخبز",
+    "صولجان",
+    "فأس 1",
+    "فأس 2",
+    "سيف اصفر",
+    "سيف احمر",
+    "ملعقه حمراء",
+    "مسدس فضائي",
+    "بخاخ اصفر",
+    "بخاخ بنفسجي",
+    "صولجان عليه ألماسه",
+    "صولجان ذهبي"
 }
 
 local itemIDs = {
@@ -440,12 +724,24 @@ local itemIDs = {
     ["سلاح يطلق أشعة"] = 18431445072,
     ["سيف نار"] = 4790788200,
     ["سيف نجوم"] = 18431436143,
-    ["دجاجة تطلق ليزر"] = 18934746119
+    ["دجاجة تطلق ليزر"] = 18934746119,
+    ["سيف الخبز"] = 3052700547,
+    ["صولجان"] = 3141364957,
+    ["فأس 1"] = 3131064293,
+    ["فأس 2"] = 3240543366,
+    ["سيف اصفر"] = 3343204006,
+    ["سيف احمر"] = 5722175994,
+    ["ملعقه حمراء"] = 3381195240,
+    ["مسدس فضائي"] = 3013849063,
+    ["بخاخ اصفر"] = 2936950534,
+    ["بخاخ بنفسجي"] = 4026739846,
+    ["صولجان عليه ألماسه"] = 3210526113,
+    ["صولجان ذهبي"] = 3241238974
 }
 
 -- الدروب داون
 local selectedItem = itemList[1]
-local itemDropdown = AddDropdown(Main, {
+local itemDropdown = AddDropdown(ScriptsTab, {
     Name = "اختر العنصر",
     Options = itemList,
     Default = itemList[1],
@@ -455,7 +751,7 @@ local itemDropdown = AddDropdown(Main, {
 })
 
 -- زر الاستخدام
-AddButton(Main, {
+AddButton(ScriptsTab, {
     Name = "اضغط واستخدم العنصر",
     Callback = function()
         if not selectedItem then
@@ -468,7 +764,6 @@ AddButton(Main, {
             :WaitForChild("Wear",9e9):InvokeServer(unpack(args))
     end
 })
-
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
