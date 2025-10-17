@@ -245,7 +245,7 @@ AddButton(DevelopersTab, {
 
 -- تبويب السكربتات
 local ScriptsTab = MakeTab({
-    Name = "السكربتات",
+    Name = "السكن",
     Image = "rbxassetid://83107814722177",
     TabTitle = false
 })
