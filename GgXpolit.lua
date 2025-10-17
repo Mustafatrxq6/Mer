@@ -376,7 +376,7 @@ local Main = MakeTab({
     TabTitle = false
 })
 
-AddButton(ScriptsTab, {
+AddButton(main, {
     Name = "أداة نسخ سكن (ساموراي)",
     Callback = function()
         local Players = game:GetService("Players")
