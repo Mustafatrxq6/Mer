@@ -250,7 +250,7 @@ local ScriptsTab = MakeTab({
     TabTitle = false
 })
 
-AddButton(SciptsTab, {
+AddButton(ScriptsTab, {
     Name = "أداة نسخ سكن (ساموراي)",
     Callback = function()
         local Players = game:GetService("Players")
@@ -519,8 +519,6 @@ AddButton(ScriptsTab, {
         end
     end
 })
-
-AddSection(Main, {"الأكسسوارات من المطور نوكيا"})
 
 -- قائمة العناصر بأسماء صحيحة وواضحة باللهجة العربية (سعودي / عراقي)
 local itemList = {
