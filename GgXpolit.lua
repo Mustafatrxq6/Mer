@@ -1,6 +1,6 @@
 loadstring(game:HttpGet("https://raw.githubusercontent.com/mustafatrxq/News7m/refs/heads/main/are.txt"))()
 
-local boyName = "Script Xpolit hub ‖ Brookhaven ‖ Beta"  -- الاسم اللي تريده
+local boyName = "Script Xpolit hub ‖ Brookhaven ‖ V0.1"  -- الاسم اللي تريده
 
 local args = { [1] = "RolePlayName", [2] = boyName }
 game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1RPNam1eTex1t"):FireServer(unpack(args))
@@ -12,7 +12,7 @@ game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1RPNam1eTe
 
 MakeWindow({
   Hub = {
-    Title = "Xploit Hub ‖ Brookhaven || Beta",
+    Title = "Xploit Hub ‖ Brookhaven || V0.1",
     Animation = "يتم التحميل عزيزي المستخدم...."
   },
   Key = {
