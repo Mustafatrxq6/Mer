@@ -594,11 +594,497 @@ AddButton(ScriptsTab, {
     end
 })
 
+local ScriptInfoTab = MakeTab({
+  Name = "شادرات",
+  Image = "rbxassetid://75529783306690",
+  TabTitle = false
+})
+
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+
+-- حفظ القيم الأصلية للـ Lighting
+local defaultLighting = {
+    Ambient = Lighting.Ambient,
+    OutdoorAmbient = Lighting.OutdoorAmbient,
+    FogStart = Lighting.FogStart,
+    FogEnd = Lighting.FogEnd,
+    FogColor = Lighting.FogColor
+}
+
+local shaderList = {
+    "شادر نيون وبرق أسطوري",
+    "شادر RTX ونيون قوي",
+    "شادر مخيف ودماء ف الماب",
+    "جو شتاء اسطوري",
+    "شادر غروب الشمس وضباب",
+    "شادر غابة سحرية مع أشعة شمس",
+    "شادر بحر هادئ وضبابي",
+    "شادر فضائي مع توهج النجوم",
+    "شادر نار مشتعلة وبخار",
+    "شادر قوس قزح متوهج",
+    "شادر ضباب ليلي",
+    "شادر غابة ضبابية",
+    "شادر غروب صحراوي",
+    "شادر جليدي متلألئ",
+    "شادر غابة ليزرية سحرية"
+}
+
+local selectedShader = shaderList[1]
+local currentEffects = {}
+
+-- DropDown
+local shaderDropdown = AddDropdown(ScriptsTab, {
+    Name = "اختر الشادر",
+    Options = shaderList,
+    Default = shaderList[1],
+    Callback = function(value)
+        selectedShader = value
+    end
+})
+
+-- دالة لإعادة Lighting للوضع الافتراضي وحذف Effects القديمة
+local function resetLighting()
+    for _, effect in pairs(currentEffects) do
+        if effect and effect.Parent then
+            effect:Destroy()
+        end
+    end
+    currentEffects = {}
+
+    Lighting.Ambient = defaultLighting.Ambient
+    Lighting.OutdoorAmbient = defaultLighting.OutdoorAmbient
+    Lighting.FogStart = defaultLighting.FogStart
+    Lighting.FogEnd = defaultLighting.FogEnd
+    Lighting.FogColor = defaultLighting.FogColor
+end
+
+-- زر التطبيق
+AddButton(ScriptsTab, {
+    Name = "اضغط لتطبيق الشادر",
+    Callback = function()
+        if not selectedShader then
+            warn("ياخي، اختار شادر أول")
+            return
+        end
+
+        resetLighting() -- إزالة الشادر القديم
+
+        -- تطبيق الشادر الجديد
+        if selectedShader == "شادر نيون وبرق أسطوري" then
+            local bloom = Instance.new("BloomEffect")
+            bloom.Intensity = 2
+            bloom.Size = 24
+            bloom.Threshold = 0.8
+            bloom.Parent = Lighting
+            table.insert(currentEffects, bloom)
+
+        elseif selectedShader == "شادر RTX ونيون قوي" then
+            local bloom = Instance.new("BloomEffect")
+            bloom.Intensity = 2.5
+            bloom.Size = 40
+            bloom.Threshold = 0.7
+            bloom.Parent = Lighting
+            table.insert(currentEffects, bloom)
+
+            local sunrays = Instance.new("SunRaysEffect")
+            sunrays.Intensity = 0.2
+            sunrays.Spread = 0.7
+            sunrays.Parent = Lighting
+            table.insert(currentEffects, sunrays)
+
+        elseif selectedShader == "شادر مخيف ودماء ف الماب" then
+            local colorCorrection = Instance.new("ColorCorrectionEffect")
+            colorCorrection.Contrast = 0.3
+            colorCorrection.Brightness = -0.2
+            colorCorrection.TintColor = Color3.fromRGB(100, 20, 20)
+            colorCorrection.Saturation = -0.5
+            colorCorrection.Parent = Lighting
+            table.insert(currentEffects, colorCorrection)
+
+            local blur = Instance.new("BlurEffect")
+            blur.Size = 8
+            blur.Parent = Lighting
+            table.insert(currentEffects, blur)
+
+        elseif selectedShader == "جو شتاء اسطوري" then
+            Lighting.Ambient = Color3.fromRGB(150,190,220)
+            Lighting.OutdoorAmbient = Color3.fromRGB(120,170,210)
+            Lighting.FogColor = Color3.fromRGB(180,210,230)
+            Lighting.FogStart = 50
+            Lighting.FogEnd = 300
+
+        elseif selectedShader == "شادر غروب الشمس وضباب" then
+            Lighting.Ambient = Color3.fromRGB(255,150,100)
+            Lighting.OutdoorAmbient = Color3.fromRGB(255,120,80)
+            Lighting.FogStart = 30
+            Lighting.FogEnd = 200
+
+        elseif selectedShader == "شادر غابة سحرية مع أشعة شمس" then
+            Lighting.Ambient = Color3.fromRGB(80,200,120)
+            Lighting.OutdoorAmbient = Color3.fromRGB(60,180,100)
+            local sunrays = Instance.new("SunRaysEffect")
+            sunrays.Intensity = 0.3
+            sunrays.Spread = 0.6
+            sunrays.Parent = Lighting
+            table.insert(currentEffects, sunrays)
+
+        elseif selectedShader == "شادر بحر هادئ وضبابي" then
+            Lighting.Ambient = Color3.fromRGB(100,150,255)
+            Lighting.OutdoorAmbient = Color3.fromRGB(80,130,255)
+            Lighting.FogStart = 20
+            Lighting.FogEnd = 150
+
+        elseif selectedShader == "شادر فضائي مع توهج النجوم" then
+            Lighting.Ambient = Color3.fromRGB(120,80,200)
+            Lighting.OutdoorAmbient = Color3.fromRGB(100,60,180)
+            local bloom = Instance.new("BloomEffect")
+            bloom.Intensity = 1.5
+            bloom.Size = 30
+            bloom.Threshold = 0.7
+            bloom.Parent = Lighting
+            table.insert(currentEffects, bloom)
+
+        elseif selectedShader == "شادر نار مشتعلة وبخار" then
+            Lighting.Ambient = Color3.fromRGB(255,80,20)
+            Lighting.OutdoorAmbient = Color3.fromRGB(255,60,0)
+            local blur = Instance.new("BlurEffect")
+            blur.Size = 5
+            blur.Parent = Lighting
+            table.insert(currentEffects, blur)
+
+        elseif selectedShader == "شادر قوس قزح متوهج" then
+            local bloom = Instance.new("BloomEffect")
+            bloom.Intensity = 2
+            bloom.Size = 35
+            bloom.Threshold = 0.6
+            bloom.Parent = Lighting
+            table.insert(currentEffects, bloom)
+
+        elseif selectedShader == "شادر ضباب ليلي" then
+            Lighting.Ambient = Color3.fromRGB(30,30,50)
+            Lighting.OutdoorAmbient = Color3.fromRGB(20,20,40)
+            Lighting.FogStart = 10
+            Lighting.FogEnd = 100
+
+        elseif selectedShader == "شادر غابة ضبابية" then
+            Lighting.Ambient = Color3.fromRGB(40,80,40)
+            Lighting.OutdoorAmbient = Color3.fromRGB(20,60,20)
+            Lighting.FogStart = 20
+            Lighting.FogEnd = 150
+
+        elseif selectedShader == "شادر غروب صحراوي" then
+            Lighting.Ambient = Color3.fromRGB(255,180,100)
+            Lighting.OutdoorAmbient = Color3.fromRGB(255,150,80)
+            local bloom = Instance.new("BloomEffect")
+            bloom.Intensity = 1.2
+            bloom.Size = 25
+            bloom.Threshold = 0.7
+            bloom.Parent = Lighting
+            table.insert(currentEffects, bloom)
+
+        elseif selectedShader == "شادر جليدي متلألئ" then
+            Lighting.Ambient = Color3.fromRGB(180,220,255)
+            Lighting.OutdoorAmbient = Color3.fromRGB(150,200,255)
+            local bloom = Instance.new("BloomEffect")
+            bloom.Intensity = 1
+            bloom.Size = 20
+            bloom.Threshold = 0.8
+            bloom.Parent = Lighting
+            table.insert(currentEffects, bloom)
+
+        elseif selectedShader == "شادر غابة ليزرية سحرية" then
+            Lighting.Ambient = Color3.fromRGB(100,200,150)
+            Lighting.OutdoorAmbient = Color3.fromRGB(60,180,120)
+            local bloom = Instance.new("BloomEffect")
+            bloom.Intensity = 2
+            bloom.Size = 30
+            bloom.Threshold = 0.6
+            bloom.Parent = Lighting
+            table.insert(currentEffects, bloom)
+        end
+
+        print("تم تفعيل الشادر: " .. selectedShader)
+    end
+})
+
 local Main = MakeTab({
-    Name = "أكسسوارات نادره",
+    Name = "جميع اغراض السكن",
     Image = "rbxassetid://83107814722177",
     TabTitle = false
 })
+
+AddButton(ScriptsTab, {
+    Name = "أداة نسخ سكن (ساموراي)",
+    Callback = function()
+        local Players = game:GetService("Players")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local LocalPlayer = Players.LocalPlayer
+
+        local TOOL_NAME = "نسخ سكن (ساموراي)"
+        local toolEquipped = false
+
+        -- إنشاء الأداة إذا مو موجودة
+        local backpack = LocalPlayer:WaitForChild("Backpack")
+        if not backpack:FindFirstChild(TOOL_NAME) then
+            local tool = Instance.new("Tool")
+            tool.Name = TOOL_NAME
+            tool.RequiresHandle = true
+
+            local handle = Instance.new("Part")
+            handle.Name = "Handle"
+            handle.Size = Vector3.new(1,1,1)
+            handle.Parent = tool
+
+            tool.Equipped:Connect(function()
+                toolEquipped = true
+            end)
+            tool.Unequipped:Connect(function()
+                toolEquipped = false
+            end)
+
+            tool.Parent = backpack
+        end
+
+        -- دالة نسخ السكن
+        local function CopySkin(TargetPlayer)
+            if not TargetPlayer or TargetPlayer == LocalPlayer then return end
+            local LChar = LocalPlayer.Character
+            local TChar = TargetPlayer.Character
+            if not LChar or not TChar then return end
+
+            local LHumanoid = LChar:FindFirstChildOfClass("Humanoid")
+            local THumanoid = TChar:FindFirstChildOfClass("Humanoid")
+            if not LHumanoid or not THumanoid then return end
+
+            local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+
+            -- نسخ الجسم
+            local PDesc = THumanoid:GetAppliedDescription()
+            local argsBody = {
+                [1] = {PDesc.Torso, PDesc.RightArm, PDesc.LeftArm, PDesc.RightLeg, PDesc.LeftLeg, PDesc.Head}
+            }
+            Remotes.ChangeCharacterBody:InvokeServer(unpack(argsBody))
+            task.wait(0.3)
+
+            -- نسخ الملابس والإكسسوارات
+            if tonumber(PDesc.Shirt) then Remotes.Wear:InvokeServer(tonumber(PDesc.Shirt)) task.wait(0.2) end
+            if tonumber(PDesc.Pants) then Remotes.Wear:InvokeServer(tonumber(PDesc.Pants)) task.wait(0.2) end
+            if tonumber(PDesc.Face) then Remotes.Wear:InvokeServer(tonumber(PDesc.Face)) task.wait(0.2) end
+
+            for _, v in ipairs(PDesc:GetAccessories(true)) do
+                if v.AssetId and tonumber(v.AssetId) then
+                    Remotes.Wear:InvokeServer(tonumber(v.AssetId))
+                    task.wait(0.2)
+                end
+            end
+
+            -- نسخ لون البشرة
+            local SkinColor = TChar:FindFirstChild("Body Colors")
+            if SkinColor then
+                Remotes.ChangeBodyColor:FireServer(tostring(SkinColor.HeadColor))
+            end
+
+            -- نسخ الاسم والسيرة ولونهم
+            local Bag = TargetPlayer:FindFirstChild("PlayersBag")
+            if Bag then
+                if Bag:FindFirstChild("RPName") and Bag.RPName.Value ~= "" then
+                    Remotes.RPNameText:FireServer("RolePlayName", Bag.RPName.Value)
+                end
+                if Bag:FindFirstChild("RPBio") and Bag.RPBio.Value ~= "" then
+                    Remotes.RPNameText:FireServer("RolePlayBio", Bag.RPBio.Value)
+                end
+                if Bag:FindFirstChild("RPNameColor") then
+                    Remotes.RPNameColor:FireServer("PickingRPNameColor", Bag.RPNameColor.Value)
+                end
+                if Bag:FindFirstChild("RPBioColor") then
+                    Remotes.RPNameColor:FireServer("PickingRPBioColor", Bag.RPBioColor.Value)
+                end
+            end
+        end
+
+        -- استخدام Mouse Click بدل Touched
+        local mouse = LocalPlayer:GetMouse()
+        mouse.Button1Down:Connect(function()
+            if not toolEquipped then return end
+            local targetPart = mouse.Target
+            if not targetPart then return end
+
+            local player = Players:GetPlayerFromCharacter(targetPart.Parent)
+            if not player then
+                -- حاول نطلع للأب الأعلى 5 مرات إذا ما لقينا اللاعب مباشرة
+                local parent = targetPart.Parent
+                for i = 1,5 do
+                    if parent.Parent then
+                        parent = parent.Parent
+                        player = Players:GetPlayerFromCharacter(parent)
+                        if player then break end
+                    end
+                end
+            end
+
+            if player then
+                CopySkin(player)
+                -- إشعار على الشاشة
+                game.StarterGui:SetCore("SendNotification", {
+                    Title = "نسخ سكن (ساموراي)",
+                    Text = "تم نسخ سكن اللاعب: "..player.Name,
+                    Duration = 3
+                })
+            end
+        end)
+    end
+})
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+
+local Target = nil
+
+-- Function to get player names
+local function GetPlayerNames()
+    local PlayerNames = {}
+    for _, player in ipairs(Players:GetPlayers()) do
+        table.insert(PlayerNames, player.Name)
+    end
+    return PlayerNames
+end
+
+-- Player selection dropdown
+local Dropdown = AddDropdown(ScriptsTab, {
+    Name = "اختيار لاعب",
+    Options = GetPlayerNames(),
+    Default = Target,
+    Callback = function(Value)
+        Target = Value
+    end
+})
+
+-- Update dropdown options when someone joins or leaves
+local function UpdateDropdown()
+    Dropdown:Refresh(GetPlayerNames(), true)
+end
+
+Players.PlayerAdded:Connect(UpdateDropdown)
+Players.PlayerRemoving:Connect(UpdateDropdown)
+
+AddButton(ScriptsTab, {
+    Name = "نسخ سكن",
+    Callback = function()
+        if not Target then return end
+
+        local LP = Players.LocalPlayer
+        local LChar = LP.Character
+        local TPlayer = Players:FindFirstChild(Target)
+
+        if TPlayer and TPlayer.Character then
+            local LHumanoid = LChar and LChar:FindFirstChildOfClass("Humanoid")
+            local THumanoid = TPlayer.Character:FindFirstChildOfClass("Humanoid")
+
+            if LHumanoid and THumanoid then
+                -- RESET LOCALPLAYER
+                local LDesc = LHumanoid:GetAppliedDescription()
+
+                -- Remove current accessories, clothes, and face
+                for _, acc in ipairs(LDesc:GetAccessories(true)) do
+                    if acc.AssetId and tonumber(acc.AssetId) then
+                        Remotes.Wear:InvokeServer(tonumber(acc.AssetId))
+                        task.wait(0.2)
+                    end
+                end
+
+                if tonumber(LDesc.Shirt) then
+                    Remotes.Wear:InvokeServer(tonumber(LDesc.Shirt))
+                    task.wait(0.2)
+                end
+
+                if tonumber(LDesc.Pants) then
+                    Remotes.Wear:InvokeServer(tonumber(LDesc.Pants))
+                    task.wait(0.2)
+                end
+
+                if tonumber(LDesc.Face) then
+                    Remotes.Wear:InvokeServer(tonumber(LDesc.Face))
+                    task.wait(0.2)
+                end
+
+                -- COPY FROM TARGET PLAYER
+                local PDesc = THumanoid:GetAppliedDescription()
+
+                -- Send body parts
+                local argsBody = {
+                    [1] = {
+                        [1] = PDesc.Torso,
+                        [2] = PDesc.RightArm,
+                        [3] = PDesc.LeftArm,
+                        [4] = PDesc.RightLeg,
+                        [5] = PDesc.LeftLeg,
+                        [6] = PDesc.Head
+                    }
+                }
+                Remotes.ChangeCharacterBody:InvokeServer(unpack(argsBody))
+                task.wait(0.5)
+
+                if tonumber(PDesc.Shirt) then
+                    Remotes.Wear:InvokeServer(tonumber(PDesc.Shirt))
+                    task.wait(0.3)
+                end
+
+                if tonumber(PDesc.Pants) then
+                    Remotes.Wear:InvokeServer(tonumber(PDesc.Pants))
+                    task.wait(0.3)
+                end
+
+                if tonumber(PDesc.Face) then
+                    Remotes.Wear:InvokeServer(tonumber(PDesc.Face))
+                    task.wait(0.3)
+                end
+
+                for _, v in ipairs(PDesc:GetAccessories(true)) do
+                    if v.AssetId and tonumber(v.AssetId) then
+                        Remotes.Wear:InvokeServer(tonumber(v.AssetId))
+                        task.wait(0.3)
+                    end
+                end
+
+                local SkinColor = TPlayer.Character:FindFirstChild("Body Colors")
+                if SkinColor then
+                    Remotes.ChangeBodyColor:FireServer(tostring(SkinColor.HeadColor))
+                    task.wait(0.3)
+                end
+
+                if tonumber(PDesc.IdleAnimation) then
+                    Remotes.Wear:InvokeServer(tonumber(PDesc.IdleAnimation))
+                    task.wait(0.3)
+                end
+
+                -- Name, bio, and color
+                local Bag = TPlayer:FindFirstChild("PlayersBag")
+                if Bag then
+                    if Bag:FindFirstChild("RPName") and Bag.RPName.Value ~= "" then
+                        Remotes.RPNameText:FireServer("RolePlayName", Bag.RPName.Value)
+                        task.wait(0.3)
+                    end
+                    if Bag:FindFirstChild("RPBio") and Bag.RPBio.Value ~= "" then
+                        Remotes.RPNameText:FireServer("RolePlayBio", Bag.RPBio.Value)
+                        task.wait(0.3)
+                    end
+                    if Bag:FindFirstChild("RPNameColor") then
+                        Remotes.RPNameColor:FireServer("PickingRPNameColor", Bag.RPNameColor.Value)
+                        task.wait(0.3)
+                    end
+                    if Bag:FindFirstChild("RPBioColor") then
+                        Remotes.RPNameColor:FireServer("PickingRPBioColor", Bag.RPBioColor.Value)
+                        task.wait(0.3)
+                    end
+                end
+            end
+        end
+    end
+})
+
+AddSection(Main, {"الأكسسوارات من المطور نوكيا"})
 
 -- قائمة العناصر بأسماء صحيحة وواضحة باللهجة العربية (سعودي / عراقي)
 local itemList = {
@@ -631,7 +1117,19 @@ local itemList = {
     "سلاح يطلق أشعة",
     "سيف نار",
     "سيف نجوم",
-    "دجاجة تطلق ليزر"
+    "دجاجة تطلق ليزر",
+    "سيف الخبز",
+    "صولجان",
+    "فأس 1",
+    "فأس 2",
+    "سيف اصفر",
+    "سيف احمر",
+    "ملعقه حمراء",
+    "مسدس فضائي",
+    "بخاخ اصفر",
+    "بخاخ بنفسجي",
+    "صولجان عليه ألماسه",
+    "صولجان ذهبي"
 }
 
 local itemIDs = {
@@ -664,12 +1162,24 @@ local itemIDs = {
     ["سلاح يطلق أشعة"] = 18431445072,
     ["سيف نار"] = 4790788200,
     ["سيف نجوم"] = 18431436143,
-    ["دجاجة تطلق ليزر"] = 18934746119
+    ["دجاجة تطلق ليزر"] = 18934746119,
+    ["سيف الخبز"] = 3052700547,
+    ["صولجان"] = 3141364957,
+    ["فأس 1"] = 3131064293,
+    ["فأس 2"] = 3240543366,
+    ["سيف اصفر"] = 3343204006,
+    ["سيف احمر"] = 5722175994,
+    ["ملعقه حمراء"] = 3381195240,
+    ["مسدس فضائي"] = 3013849063,
+    ["بخاخ اصفر"] = 2936950534,
+    ["بخاخ بنفسجي"] = 4026739846,
+    ["صولجان عليه ألماسه"] = 3210526113,
+    ["صولجان ذهبي"] = 3241238974
 }
 
 -- الدروب داون
 local selectedItem = itemList[1]
-local itemDropdown = AddDropdown(Main, {
+local itemDropdown = AddDropdown(ScriptsTab, {
     Name = "اختر العنصر",
     Options = itemList,
     Default = itemList[1],
@@ -679,7 +1189,7 @@ local itemDropdown = AddDropdown(Main, {
 })
 
 -- زر الاستخدام
-AddButton(Main, {
+AddButton(ScriptsTab, {
     Name = "اضغط واستخدم العنصر",
     Callback = function()
         if not selectedItem then
@@ -693,6 +1203,100 @@ AddButton(Main, {
     end
 })
 
+AddSection(Main, {"السكنات الصغيره"})
+
+local skins = {
+    ["القزم"] = {14579958702,14579959062,14579959191,14579959249,14579963667,1},
+    ["قزم2"] = {18599265011,18599265151,18599265190,18599265270,18599264796,1}
+}
+
+local selectedSkin = "القزم"
+local ddSkins = AddDropdown(ScriptsTab, {
+    Name = "اختر السكن",
+    Options = {"القزم","القزم2"},
+    Default = "القزم",
+    Callback = function(value)
+        selectedSkin = value
+    end
+})
+
+AddButton(ScriptsTab, {
+    Name = "استخدم السكن",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer(skins[selectedSkin])
+    end
+})
+
+local bodies = {
+    ["جسم بنت"] = {15539008532,15539008875,15539008680,15539008795,15539011945,1},
+    ["جسم بنت ضعيف خصر"] = {74302534603111,76683091425509,75159926897589,1,1,1},
+    ["جسم ولد"] = {17754346388,1,1,1,1,1},
+    ["جسم ولد ضعيف"] = {92757812011061,99519402284266,115905570886697,1,1,1}
+}
+
+local selectedBody = "جسم بنت"
+local ddBodies = AddDropdown(ScriptsTab, {
+    Name = "اختر الجسم",
+    Options = {"جسم بنت","جسم بنت ضعيف خصر","جسم ولد","جسم ولد ضعيف"},
+    Default = "جسم بنت",
+    Callback = function(value)
+        selectedBody = value
+    end
+})
+
+AddButton(ScriptsTab, {
+    Name = "استخدم الجسم",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer(bodies[selectedBody])
+    end
+})
+
+local heads = {
+    ["رأس مخفي"] = 134082579,
+    ["راس روبوت"] = 3210773801
+}
+
+local selectedHead = "رأس مخفي"
+local ddHeads = AddDropdown(ScriptsTab, {
+    Name = "اختر الرأس",
+    Options = {"رأس مخفي", "راس روبوت"},
+    Default = "رأس مخفي",
+    Callback = function(value)
+        selectedHead = value
+    end
+})
+
+AddButton(ScriptsTab, {
+    Name = "استخدم الرأس",
+    Callback = function()
+        local headID = heads[selectedHead]
+        game:GetService("ReplicatedStorage").Remotes.Wear:InvokeServer(headID)
+    end
+})
+
+local legs = {
+    ["رجل مقطوعه"] = {1,1,1,139607718,1,1},
+    ["رجل حديدة"] = {1,1,1,17500249989,1,1},
+    ["رجل العظام الرصاصي"] = {1,1,1,17500249989,1,1},
+    ["رجل العظام السود"] = {1,1,1,14547162578,1,1}
+}
+
+local selectedLeg = "رجل مقطوعه"
+local ddLegs = AddDropdown(ScriptsTab, {
+    Name = "اختر الرجل",
+    Options = {"رجل مقطوعه", "رجل حديدة", "رجل العظام الرصاصي", "رجل العظام السود"},
+    Default = "رجل مقطوعه",
+    Callback = function(value)
+        selectedLeg = value
+    end
+})
+
+AddButton(ScriptsTab, {
+    Name = "استخدم الرجل",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer(legs[selectedLeg])
+    end
+})
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
